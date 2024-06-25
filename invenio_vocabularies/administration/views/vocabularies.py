@@ -8,12 +8,17 @@
 # details.
 
 """Vocabularies admin interface."""
-from invenio_administration.views.base import AdminResourceListView
+from flask import current_app
+from invenio_administration.views.base import (
+    AdminResourceEditView,
+    AdminResourceListView,
+)
+from invenio_i18n import lazy_gettext as _
 from flask import current_app
 
 
 class VocabulariesListView(AdminResourceListView):
-    """Configuration for vocabularies list view."""
+    """Configuration for overview list view for vocabularies."""
 
     api_endpoint = "/vocabularies/"
     name = "vocabulary-types"
@@ -41,13 +46,16 @@ class VocabulariesListView(AdminResourceListView):
     search_facets_config_name = "VOCABULARIES_TYPES_FACETS"
     search_sort_config_name = "VOCABULARIES_TYPES_SORT_OPTIONS"
 
+
 class VocabularyDetailsListView(AdminResourceListView):
-    """Configuration for vocabularies list view."""
+    """Configuration for list view for specific vocabulary types."""
 
     def get_api_endpoint(self, pid_value=None):
         """overwrite get_api_endpoint to accept pid_value"""
 
-        if pid_value in current_app.config.get("VOCABULARIES_CUSTOM_VOCABULARY_TYPES", []):
+        if pid_value in current_app.config.get(
+            "VOCABULARIES_CUSTOM_VOCABULARY_TYPES", []
+        ):
             return f"/api/{pid_value}"
         else:
             return f"/api/vocabularies/{pid_value}"
@@ -82,8 +90,6 @@ class VocabularyDetailsListView(AdminResourceListView):
     name = "vocabulary-type-items"
     url = "/vocabulary-types/<pid_value>"
 
-    api_endpoint = "/vocabularies/"
-
     # INFO name of the resource's list view name, enables navigation between items view and types view.
     list_view_name = "vocabulary-types"
 
@@ -104,9 +110,41 @@ class VocabularyDetailsListView(AdminResourceListView):
 
     item_field_list = {
         "id": {"text": "ID", "order": 0},
-        "created": {"text": "Created", "order": 1}
+        "created": {"text": "Created", "order": 1},
     }
 
     search_config_name = "VOCABULARIES_TYPES_ITEMS_SEARCH"
     search_facets_config_name = "VOCABULARIES_TYPES_ITEMS_FACETS"
     search_sort_config_name = "VOCABULARIES_TYPES_ITEMS_SORT_OPTIONS"
+
+
+class VocabularyTypesDetailsEditView(AdminResourceEditView):
+    """WIP Configuration for vocabulary item edit view."""
+
+    # Edit view for vocabulary items from a specific vocabulary type
+    # def get_api_endpoint(vocab_type=None, pid=None):
+    #     """overwrite get_api_endpoint to accept pid_value"""
+    #     if vocab_type in current_app.config.get(
+    #         "VOCABULARIES_CUSTOM_VOCABULARY_TYPES", []
+    #     ):
+    #         return f"/api/{vocab_type}"
+    #     else:
+    #         return f"/api/{vocab_type}/{pid}"
+
+    name = "vocabularies_details_edit"
+    url = "/vocabulary-types/<vocab_type>/<pid_value>/edit"
+    resource_config = "vocabulary_admin_resource"
+    pid_path = "id"
+    title = "Edit vocabulary item"
+    api_endpoint = "/vocabulary-types/<vocab_type>/<pid_value>"
+    list_view_name = "vocabulary-type-items"
+
+    # form_fields = {
+    #     "ID": {
+    #         "order": 1,
+    #         "text": "Set ID",
+    #         "description": _("Some ID."),
+    #     },
+    #     "created": {"order": 2},
+    #     "updated": {"order": 3},
+    # }
