@@ -131,8 +131,41 @@ class VocabularyTypesDetailsEditView(AdminResourceEditView):
     #     else:
     #         return f"/api/{vocab_type}/{pid}"
 
+    def get(self, **kwargs):
+        """GET view method."""
+        schema = self.get_service_schema()
+        serialized_schema = self._schema_to_json(schema)
+        form_fields = self.form_fields
+        return self.render(
+            **{
+                "resource_schema": serialized_schema,
+                "form_fields": form_fields,
+                "pid": kwargs.get("pid_value"),
+                "api_endpoint": self.get_api_endpoint(),
+                "title": self.title,
+                "list_endpoint": self.get_list_view_endpoint(),
+                "ui_config": self.form_fields,
+            }
+        )
+
+    def _get_view_url(self, url):
+        """Generate URL for the view. Override to change default behavior."""
+        new_url = url
+        if new_url is None:
+            if isinstance(self, self.administration.dashboard_view_class):
+                new_url = "/"
+            else:
+                new_url = "/%s" % self.name.lower()
+        else:
+            if not url.startswith("/"):
+                new_url = "/%s" % (url)
+        # Sanitize url
+        new_url = new_url.replace(" ", "_")
+
+        return new_url
+
     name = "vocabularies_details_edit"
-    url = "/vocabulary-types/<vocab_type>/<pid_value>/edit"
+    url = "/vocabulary-types/names/<pid_value>/edit"
     resource_config = "vocabulary_admin_resource"
     pid_path = "id"
     title = "Edit vocabulary item"
