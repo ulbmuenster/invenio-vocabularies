@@ -10,9 +10,10 @@
 """Vocabularies admin interface."""
 from functools import partial
 
-from flask import current_app
-from invenio_administration.views.base import AdminResourceListView
+from flask import current_app, url_for
+from invenio_administration.views.base import AdminResourceListView, AdminResourceEditView
 from invenio_search_ui.searchconfig import FacetsConfig, SortConfig, search_app_config
+from invenio_i18n import lazy_gettext as _
 
 
 class VocabulariesListView(AdminResourceListView):
@@ -135,3 +136,78 @@ class VocabularyDetailsListView(AdminResourceListView):
     search_config_name = "VOCABULARIES_TYPES_ITEMS_SEARCH"
     search_facets_config_name = "VOCABULARIES_TYPES_ITEMS_FACETS"
     search_sort_config_name = "VOCABULARIES_TYPES_ITEMS_SORT_OPTIONS"
+
+class VocabularyTypesDetailsEditView(AdminResourceEditView):
+    """WIP Configuration for vocabulary item edit view."""
+
+    # Edit view for vocabulary items from a specific vocabulary type
+    # def get_api_endpoint(vocab_type=None, pid=None):
+    #     """overwrite get_api_endpoint to accept pid_value"""
+    #     if vocab_type in current_app.config.get(
+    #         "VOCABULARIES_CUSTOM_VOCABULARY_TYPES", []
+    #     ):
+    #         return f"/api/{vocab_type}"
+    #     else:
+    #         return f"/api/{vocab_type}/{pid}"
+
+    # def get(self, **kwargs):
+    #     """GET view method."""
+    #     schema = self.get_service_schema()
+    #     serialized_schema = self._schema_to_json(schema)
+    #     form_fields = self.form_fields
+    #     return self.render(
+    #         **{
+    #             "resource_schema": serialized_schema,
+    #             "form_fields": form_fields,
+    #             "pid": kwargs.get("pid_value"),
+    #             "api_endpoint": self.get_api_endpoint(),
+    #             "title": self.title,
+    #             "list_endpoint": self.get_list_view_endpoint(),
+    #             "ui_config": self.form_fields,
+    #         }
+    #     )
+
+    def get_list_view_endpoint(self, **kwargs):
+        """Returns administration UI list view endpoint."""
+        # if self.list_view_name:
+        #     return url_for(f"administration.{self.list_view_name}")
+        # if isinstance(self, AdminResourceListView):
+        #     return url_for(f"administration.{self.name}")
+        pid_value = kwargs.get("pid_value", "")
+        vocab_type = kwargs.get("vocab_type", "")
+
+        return f"/vocabularies/{vocab_type}/"
+
+    # def _get_view_url(self, url):
+    #     """Generate URL for the view. Override to change default behavior."""
+    #     new_url = url
+    #     if new_url is None:
+    #         if isinstance(self, self.administration.dashboard_view_class):
+    #             new_url = "/"
+    #         else:
+    #             new_url = "/%s" % self.name.lower()
+    #     else:
+    #         if not url.startswith("/"):
+    #             new_url = "/%s" % (url)
+    #     # Sanitize url
+    #     new_url = new_url.replace(" ", "_")
+    #
+    #     return new_url
+
+    name = "vocabularies_details_edit"
+    url = "/vocabulary-types/names/<pid_value>/edit"
+    resource_config = "vocabulary_admin_resource"
+    pid_path = "id"
+    title = "Edit vocabulary item"
+    api_endpoint = "/vocabulary-types/<vocab_type>/<pid_value>"
+    list_view_name = "vocabulary-type-items"
+
+    form_fields = {
+        "ID": {
+            "order": 1,
+            "text": "Set ID",
+            "description": _("Some ID."),
+        },
+        "created": {"order": 2},
+        "updated": {"order": 3},
+    }
